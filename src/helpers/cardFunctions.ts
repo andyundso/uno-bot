@@ -3,7 +3,7 @@ import {DistributedCards, ICard, IColorCard} from "../types";
 export const generateCards = (): ICard[] => {
     const colors: string[] = ['blue', 'green', 'red', 'yellow'];
     const allCards: ICard[] = [];
-    let i: number = 1;
+    let i: number = 1;
 
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n: number) => {
         colors.forEach((t: string) => {
@@ -67,4 +67,8 @@ export const distributeCards = (cards: ICard[]): DistributedCards => {
         cardStaple: cards,
         playerCards: playerCards
     }
+};
+
+export const validCard = (cardToPlay: ICard, lastCard: ICard) => {
+    return cardToPlay.color === lastCard.color || cardToPlay.value === lastCard.value
 };

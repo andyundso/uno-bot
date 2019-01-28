@@ -1,6 +1,8 @@
+import 'izitoast/dist/css/iziToast.css';
+import iziToast from "izitoast";
 import * as React from 'react';
 import './App.css';
-import {distributeCards, generateCards} from "./helpers/cardFunctions";
+import {distributeCards, generateCards, validCard} from "./helpers/cardFunctions";
 import {Card} from "./layout/Card";
 import {PlayerBoard} from "./PlayerBoard";
 import {DistributedCards, ICard} from "./types";
@@ -41,8 +43,8 @@ class App extends React.Component<Props, State> {
             }),
         }, () => {
             const distributedCards: DistributedCards = distributeCards(this.state.cardStaple);
-            this.setState({...distributedCards}, () => {
-                const firstCard = this.state.cardStaple[0];
+            this.setState({...distributedCards}, () => {
+                const firstCard = this.state.cardStaple[0];
                 const newCardStaple = this.state.cardStaple;
                 newCardStaple.unshift();
 
@@ -55,19 +57,26 @@ class App extends React.Component<Props, State> {
         });
     }
 
-    public updatePlayerCardState = (cardId: number) => {
-      const card = this.state.playerCards.find((c: ICard) => c.key === cardId);
+    public updatePlayerCardState = (cardId: number) => {
+        const card = this.state.playerCards.find((c: ICard) => c.key === cardId);
+        if (card) {
+            if (validCard(card, this.state.playedCards[0])) {
+                const playedCards = this.state.playedCards;
+                playedCards.unshift(card);
+                const playerCards = this.state.playerCards.filter((c: ICard) => c.key !== cardId);
 
-      if (card) {
-          const playedCards = this.state.playedCards;
-          playedCards.unshift(card);
-          const playerCards = this.state.playerCards.filter((c: ICard) => c.key !== cardId);
-
-          this.setState({
-              playedCards: playedCards,
-              playerCards: playerCards
-          })
-      }
+                this.setState({
+                    playedCards: playedCards,
+                    playerCards: playerCards
+                })
+            } else {
+                iziToast.show({
+                    color: 'red',
+                    message: 'Du kannst diese Karte nicht spielen!',
+                    position: 'topCenter',
+                })
+            }
+        }
     };
 
     public render() {
