@@ -20,11 +20,13 @@ export const generateCards = (): ICard[] => {
     });
 
     // copy each cards again
-    allCards.forEach((c: ICard) => {
-        c.key = i;
-        allCards.push(c);
+    allCards.forEach((c: IColorCard) => {
+        const clonedCard: IColorCard = Object.assign({}, c);
+        clonedCard.key = i;
+        allCards.push(clonedCard);
         i++
     });
+
     colors.forEach((t: string) => {
         const card: IColorCard = {
             color: t,
