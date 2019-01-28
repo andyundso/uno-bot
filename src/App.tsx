@@ -2,9 +2,10 @@ import 'izitoast/dist/css/iziToast.css';
 import iziToast from "izitoast";
 import * as React from 'react';
 import './App.css';
-import {distributeCards, generateCards, validCard} from "./helpers/cardFunctions";
+import {distributeCards, generateCards, playableCards, validCard} from "./helpers/cardFunctions";
 import {Card} from "./layout/Card";
-import {PlayerBoard} from "./PlayerBoard";
+import {CardStaple} from "./layout/CardStaple";
+import {PlayerBoard} from "./layout/PlayerBoard";
 import {DistributedCards, ICard} from "./types";
 
 interface Props {
@@ -57,6 +58,26 @@ class App extends React.Component<Props, State> {
         });
     }
 
+    public takeCard = () => {
+        if (playableCards(this.state.playerCards, this.state.playedCards[0])) {
+            iziToast.show({
+                color: 'red',
+                message: 'Du kannst Karten ausspielen, daher musst du keine Karte ziehen!',
+                position: 'topCenter',
+            })
+        } else {
+            const cardStaple = this.state.cardStaple;
+            const userCards = this.state.playerCards;
+            const pickedCard = cardStaple.shift();
+            userCards.push(pickedCard!);
+
+            this.setState({
+                cardStaple: cardStaple,
+                playerCards: userCards
+            })
+        }
+    };
+
     public updatePlayerCardState = (cardId: number) => {
         const card = this.state.playerCards.find((c: ICard) => c.key === cardId);
         if (card) {
@@ -92,7 +113,17 @@ class App extends React.Component<Props, State> {
                     </div>
 
                     <div style={{height: '33%', width: '100%'}}>
-                        <div style={{backgroundColor: 'black', float: 'left', height: '100%', width: '33%'}}/>
+                        <div style={{
+                            alignItems: 'center',
+                            display: 'flex',
+                            float: 'left',
+                            justifyContent: 'center',
+                            height: '100%',
+                            width: '33%'
+                        }}>
+                            <CardStaple onClick={this.takeCard}/>
+                        </div>
+
                         <div style={{
                             alignItems: 'center',
                             backgroundColor: 'white',

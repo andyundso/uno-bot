@@ -20,7 +20,11 @@ export const generateCards = (): ICard[] => {
     });
 
     // copy each cards again
-    allCards.forEach((c: ICard) => allCards.push(c));
+    allCards.forEach((c: ICard) => {
+        c.key = i;
+        allCards.push(c);
+        i++
+    });
     colors.forEach((t: string) => {
         const card: IColorCard = {
             color: t,
@@ -71,4 +75,8 @@ export const distributeCards = (cards: ICard[]): DistributedCards => {
 
 export const validCard = (cardToPlay: ICard, lastCard: ICard) => {
     return cardToPlay.color === lastCard.color || cardToPlay.value === lastCard.value
+};
+
+export const playableCards = (cards: ICard[], lastCard: ICard) => {
+    return cards.map((c: ICard) => validCard(c, lastCard)).includes(true)
 };

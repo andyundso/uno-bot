@@ -3,7 +3,8 @@ import * as React from 'react'
 interface Props {
     color: string;
     onClick?: () => void
-    value: number;
+    value: number|string;
+    verticalText?: boolean;
 }
 
 export class Card extends React.Component<Props> {
@@ -17,6 +18,7 @@ export class Card extends React.Component<Props> {
                 display: 'flex',
                 justifyContent: 'center',
                 height: '80%',
+                transform: this.props.verticalText ? 'rotate(90deg)' : undefined,
                 width: '50%'
             }}>
                 <h1>{this.props.value}</h1>

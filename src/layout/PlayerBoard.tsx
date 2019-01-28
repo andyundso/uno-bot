@@ -1,6 +1,6 @@
 import * as React from 'react'
-import {Card} from "./layout/Card";
-import {ICard} from "./types";
+import {Card} from "./Card";
+import {ICard} from "../types";
 
 interface Props {
     cards: ICard[];
