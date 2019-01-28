@@ -13,6 +13,7 @@ interface State {
     bot2Cards: ICard[];
     bot3Cards: ICard[];
     cardStaple: ICard[];
+    playedCards: ICard[];
     playerCards: ICard[];
     loading: boolean;
 }
@@ -27,6 +28,7 @@ class App extends React.Component<Props, State> {
             bot3Cards: [],
             cardStaple: [],
             loading: true,
+            playedCards: [],
             playerCards: []
         }
     }
@@ -39,9 +41,34 @@ class App extends React.Component<Props, State> {
             }),
         }, () => {
             const distributedCards: DistributedCards = distributeCards(this.state.cardStaple);
-            this.setState({...distributedCards, loading: false})
+            this.setState({...distributedCards}, () => {
+                const firstCard = this.state.cardStaple[0];
+                const newCardStaple = this.state.cardStaple;
+                newCardStaple.unshift();
+
+                this.setState({
+                    cardStaple: newCardStaple,
+                    loading: false,
+                    playedCards: [firstCard],
+                })
+            })
         });
     }
+
+    public updatePlayerCardState = (cardId: number) => {
+      const card = this.state.playerCards.find((c: ICard) => c.key === cardId);
+
+      if (card) {
+          const playedCards = this.state.playedCards;
+          playedCards.unshift(card);
+          const playerCards = this.state.playerCards.filter((c: ICard) => c.key !== cardId);
+
+          this.setState({
+              playedCards: playedCards,
+              playerCards: playerCards
+          })
+      }
+    };
 
     public render() {
         if (this.state.loading) {
@@ -66,13 +93,13 @@ class App extends React.Component<Props, State> {
                             height: '100%',
                             width: '33%'
                         }}>
-                            <Card color={this.state.cardStaple[0].color} value={this.state.cardStaple[0].value}/>
+                            <Card color={this.state.playedCards[0].color} value={this.state.playedCards[0].value}/>
                         </div>
                         <div style={{backgroundColor: 'black', float: 'left', height: '100%', width: '33%'}}/>
                     </div>
 
                     <div style={{height: '33%'}}>
-                        <PlayerBoard cards={this.state.playerCards}/>
+                        <PlayerBoard cards={this.state.playerCards} onClick={this.updatePlayerCardState}/>
                     </div>
                 </div>
             )

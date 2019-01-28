@@ -3,16 +3,19 @@ import {DistributedCards, ICard, IColorCard} from "../types";
 export const generateCards = (): ICard[] => {
     const colors: string[] = ['blue', 'green', 'red', 'yellow'];
     const allCards: ICard[] = [];
+    let i: number = 1;
 
     [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((n: number) => {
         colors.forEach((t: string) => {
             const card: IColorCard = {
                 color: t,
+                key: i,
                 type: "color",
                 value: n,
             };
 
-            allCards.push(card)
+            allCards.push(card);
+            i++;
         })
     });
 
@@ -21,11 +24,13 @@ export const generateCards = (): ICard[] => {
     colors.forEach((t: string) => {
         const card: IColorCard = {
             color: t,
+            key: i,
             type: "color",
             value: 0,
         };
 
-        allCards.push(card)
+        allCards.push(card);
+        i++;
     });
 
     return allCards

@@ -8,6 +8,7 @@ export interface DistributedCards {
 
 export interface ICard {
     color: string;
+    key: number;
     type: string;
     value: number;
 }
