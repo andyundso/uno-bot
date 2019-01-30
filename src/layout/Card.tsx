@@ -17,9 +17,9 @@ export class Card extends React.Component<Props> {
                 borderRadius: '25px',
                 display: 'flex',
                 justifyContent: 'center',
-                height: '80%',
+                height: '200px',
                 transform: this.props.verticalText ? 'rotate(90deg)' : undefined,
-                width: '50%'
+                width: '140px'
             }}>
                 <h1>{this.props.value}</h1>
             </div>
