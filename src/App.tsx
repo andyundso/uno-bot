@@ -113,16 +113,7 @@ class App extends React.Component<Props, State> {
                     </div>
 
                     <div style={{height: '33%', width: '100%'}}>
-                        <div style={{
-                            alignItems: 'center',
-                            display: 'flex',
-                            float: 'left',
-                            justifyContent: 'center',
-                            height: '100%',
-                            width: '33%'
-                        }}>
-                            <CardStaple onClick={this.takeCard}/>
-                        </div>
+                        <CardStaple cardStapleCount={this.state.cardStaple.length} onClick={this.takeCard}/>
 
                         <div style={{
                             alignItems: 'center',
