@@ -8,16 +8,15 @@ import {CardStaple} from "./layout/CardStaple";
 import {PlayerBoard} from "./layout/PlayerBoard";
 import {DistributedCards, ICard} from "./types";
 
+const playerNumber: number = 3;
+
 interface Props {
 }
 
 interface State {
-    bot1Cards: ICard[];
-    bot2Cards: ICard[];
-    bot3Cards: ICard[];
     cardStaple: ICard[];
     playedCards: ICard[];
-    playerCards: ICard[];
+    playerCardStaples: Array<ICard[]>
     loading: boolean;
 }
 
@@ -26,13 +25,10 @@ class App extends React.Component<Props, State> {
         super(props);
 
         this.state = {
-            bot1Cards: [],
-            bot2Cards: [],
-            bot3Cards: [],
             cardStaple: [],
             loading: true,
             playedCards: [],
-            playerCards: []
+            playerCardStaples: []
         }
     }
 
@@ -59,36 +55,38 @@ class App extends React.Component<Props, State> {
     }
 
     public takeCard = () => {
-        if (playableCards(this.state.playerCards, this.state.playedCards[0])) {
+        if (playableCards(this.state.playerCardStaples[playerNumber], this.state.playedCards[0])) {
             iziToast.show({
                 color: 'red',
                 message: 'Du kannst Karten ausspielen, daher musst du keine Karte ziehen!',
                 position: 'topCenter',
             })
         } else {
+            let newPlayerCardStaple: Array<ICard[]> = this.state.playerCardStaples;
             const cardStaple = this.state.cardStaple;
-            const userCards = this.state.playerCards;
             const pickedCard = cardStaple.shift();
-            userCards.push(pickedCard!);
+            newPlayerCardStaple[playerNumber].push(pickedCard!);
 
             this.setState({
                 cardStaple: cardStaple,
-                playerCards: userCards
+                playerCardStaples: newPlayerCardStaple
             })
         }
     };
 
     public updatePlayerCardState = (cardId: number) => {
-        const card = this.state.playerCards.find((c: ICard) => c.key === cardId);
+        const card = this.state.playerCardStaples[playerNumber].find((c: ICard) => c.key === cardId);
         if (card) {
             if (validCard(card, this.state.playedCards[0])) {
+                let newPlayerCardStaples: Array<ICard[]> = this.state.playerCardStaples;
                 const playedCards = this.state.playedCards;
                 playedCards.unshift(card);
-                const playerCards = this.state.playerCards.filter((c: ICard) => c.key !== cardId);
+                const newPlayerCards = newPlayerCardStaples[playerNumber].filter((c: ICard) => c.key !== cardId);
+                newPlayerCardStaples[playerNumber] = newPlayerCards
 
                 this.setState({
                     playedCards: playedCards,
-                    playerCards: playerCards
+                    playerCardStaples: newPlayerCardStaples
                 })
             } else {
                 iziToast.show({
@@ -130,7 +128,7 @@ class App extends React.Component<Props, State> {
                     </div>
 
                     <div style={{height: '33%'}}>
-                        <PlayerBoard cards={this.state.playerCards} onClick={this.updatePlayerCardState}/>
+                        <PlayerBoard cards={this.state.playerCardStaples[playerNumber]} onClick={this.updatePlayerCardState}/>
                     </div>
                 </div>
             )

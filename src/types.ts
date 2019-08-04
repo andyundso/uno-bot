@@ -1,9 +1,6 @@
 export interface DistributedCards {
-    bot1Cards: ICard[];
-    bot2Cards: ICard[];
-    bot3Cards: ICard[];
     cardStaple: ICard[];
-    playerCards: ICard[];
+    playerCardStaples: Array<ICard[]>;
 }
 
 export interface ICard {

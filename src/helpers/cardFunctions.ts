@@ -43,35 +43,22 @@ export const generateCards = (): ICard[] => {
 };
 
 export const distributeCards = (cards: ICard[]): DistributedCards => {
-    const playerCards: ICard[] = [];
-    const bot1Cards: ICard[] = [];
-    const bot2Cards: ICard[] = [];
-    const bot3Cards: ICard[] = [];
+    const playerCardStaples: Array<ICard[]> = [];
+    Array.from({ length: 4 }).forEach((x, i) => {
+        playerCardStaples.push([])
+    });
 
     for (let i: number = 0; i <= 2; i++) {
-        for (let i: number = 0; i <= 2; i++) {
-            playerCards.push(cards.shift()!)
-        }
-
-        for (let i: number = 0; i <= 2; i++) {
-            bot1Cards.push(cards.shift()!)
-        }
-
-        for (let i: number = 0; i <= 2; i++) {
-            bot2Cards.push(cards.shift()!)
-        }
-
-        for (let i: number = 0; i <= 2; i++) {
-            bot3Cards.push(cards.shift()!)
-        }
+        Array.from({ length: 4 }).forEach((x, i) => {
+            for (let j: number = 0; j <= 2; j++) {
+                playerCardStaples[i].push(cards.shift()!)
+            }
+        });
     }
 
     return {
-        bot1Cards: bot1Cards,
-        bot2Cards: bot2Cards,
-        bot3Cards: bot3Cards,
         cardStaple: cards,
-        playerCards: playerCards
+        playerCardStaples: playerCardStaples
     }
 };
 
