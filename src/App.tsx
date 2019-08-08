@@ -105,8 +105,9 @@ class App extends React.Component<Props, State> {
             const pickedCard = cardStaple.shift();
             newPlayerCardStaple[playerNumber].push(pickedCard!);
 
+            // dont change the player if the picked card is playable
             this.setState({
-                currentPlayer: 0,
+                currentPlayer: validCard(pickedCard!, this.state.playedCards[0]) ? 3 : 0,
                 cardStaple: cardStaple,
                 playerCardStaples: newPlayerCardStaple
             })
