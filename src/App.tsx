@@ -1,13 +1,15 @@
 import 'izitoast/dist/css/iziToast.css';
-import iziToast from "izitoast";
 import * as React from 'react';
 import './App.css';
 import {updateBotCardState} from "./helpers/botFunctions";
 import {distributeCards, generateCards, playableCards, validCard} from "./helpers/cardFunctions";
+import {readablePlayerName} from "./helpers/helpers";
+import {ErrorMessage, SuccessMessage} from "./helpers/iziToast";
 import {BotBoard} from "./layout/BotBoard";
 import {Card} from "./layout/Card";
 import {CardStaple} from "./layout/CardStaple";
 import {PlayerBoard} from "./layout/PlayerBoard";
+import {YellUno} from "./layout/YellUno";
 import {DistributedCards, ICard} from "./types";
 
 const playerNumber: number = 3;
@@ -21,6 +23,7 @@ interface State {
     playedCards: ICard[];
     playerCardStaples: Array<ICard[]>
     loading: boolean;
+    yelledUno: Array<Boolean>
 }
 
 class App extends React.Component<Props, State> {
@@ -32,7 +35,8 @@ class App extends React.Component<Props, State> {
             currentPlayer: 3,
             loading: true,
             playedCards: [],
-            playerCardStaples: []
+            playerCardStaples: [],
+            yelledUno: [false, false, false, false]
         }
     }
 
@@ -58,8 +62,14 @@ class App extends React.Component<Props, State> {
         });
     }
 
-    public componentDidUpdate(prevState: Readonly<State>): void {
+    public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): void {
         if (prevState.currentPlayer !== this.state.currentPlayer) {
+            // check the uno calls from the last player
+            this.checkForWrongUnoCalls(
+                prevState.playerCardStaples[prevState.currentPlayer],
+                prevState.currentPlayer
+            );
+
             if (this.state.currentPlayer !== 3) {
                 this.calculateBotTurn()
             }
@@ -84,6 +94,12 @@ class App extends React.Component<Props, State> {
             playerCardStaples[currentPlayer].unshift(cardToTake!)
         }
 
+        // bot has an 90 percent chance to yell uno or a 2 percent chance to wrongly call uno
+        if ((playerCardStaples[currentPlayer].length === 1 && Math.random() < 0.9) ||
+            playerCardStaples[currentPlayer].length !== 1 && Math.random() > 0.98) {
+            this.yellUno()
+        }
+
         this.setState({
             cardStaple: cardStaple,
             currentPlayer: (currentPlayer + 1) % 4,
@@ -92,13 +108,27 @@ class App extends React.Component<Props, State> {
         })
     }
 
+    private checkForWrongUnoCalls(prevCards: ICard[], prevPlayer: number) {
+        if (prevCards.length === 1 && !this.state.yelledUno[prevPlayer]) {
+            // player missed to yell uno and has to pick two additional cards
+            ErrorMessage(readablePlayerName(prevPlayer) + ' missed to call uno and picks up two additional cards');
+            this.takeTwoCards(prevPlayer)
+        } else if (prevCards.length !== 1 && this.state.yelledUno[prevPlayer]) {
+            // player wrongly called uno and has to take two cards as well
+            ErrorMessage(readablePlayerName(prevPlayer) + ' called UNO too early and has to pick up two additional cards');
+            this.takeTwoCards(prevPlayer)
+        } else {
+            if (!this.state.yelledUno.every(value => !value)) {
+                this.setState({
+                    yelledUno: [false, false, false, false]
+                })
+            }
+        }
+    }
+
     public takeCard = () => {
         if (playableCards(this.state.playerCardStaples[playerNumber], this.state.playedCards[0])) {
-            iziToast.show({
-                color: 'red',
-                message: 'Du kannst Karten ausspielen, daher musst du keine Karte ziehen!',
-                position: 'topCenter',
-            })
+            ErrorMessage('Du kannst Karten ausspielen, daher musst du keine Karte ziehen!')
         } else {
             let newPlayerCardStaple: Array<ICard[]> = this.state.playerCardStaples;
             const cardStaple = this.state.cardStaple;
@@ -113,6 +143,18 @@ class App extends React.Component<Props, State> {
             })
         }
     };
+
+    private takeTwoCards(playerNumber: number) {
+        let {cardStaple, playerCardStaples} = this.state;
+        const card1 = cardStaple.shift();
+        const card2 = cardStaple.shift();
+        playerCardStaples[playerNumber].push(card1!);
+        playerCardStaples[playerNumber].push(card2!);
+
+        this.setState({
+            playerCardStaples, cardStaple
+        })
+    }
 
     public updatePlayerCardState = (cardId: number) => {
         const card = this.state.playerCardStaples[playerNumber].find((c: ICard) => c.key === cardId);
@@ -129,13 +171,16 @@ class App extends React.Component<Props, State> {
                     playerCardStaples: newPlayerCardStaples
                 })
             } else {
-                iziToast.show({
-                    color: 'red',
-                    message: 'Du kannst diese Karte nicht spielen!',
-                    position: 'topCenter',
-                })
+                ErrorMessage('Du kannst diese Karte nicht spielen!');
             }
         }
+    };
+
+    public yellUno = () => {
+        let {yelledUno} = this.state;
+        yelledUno[this.state.currentPlayer] = true;
+        this.setState({yelledUno});
+        SuccessMessage(readablePlayerName(this.state.currentPlayer) + ' yelled Uno!')
     };
 
     public render() {
@@ -164,7 +209,9 @@ class App extends React.Component<Props, State> {
                         }}>
                             <Card color={this.state.playedCards[0].color} value={this.state.playedCards[0].value}/>
                         </div>
-                        <div style={{backgroundColor: 'black', float: 'left', height: '100%', width: '33%'}}/>
+                        <div style={{float: 'left', height: '100%', width: '33%'}}>
+                            <YellUno onClick={this.yellUno}/>
+                        </div>
                     </div>
 
                     <div style={{height: '33%'}}>
