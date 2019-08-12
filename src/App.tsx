@@ -102,9 +102,17 @@ class App extends React.Component<Props, State> {
 
         this.setState({
             cardStaple: cardStaple,
-            currentPlayer: (currentPlayer + 1) % 4,
             playedCards: playedCards,
             playerCardStaples: playerCardStaples
+        }, () => {
+            // look if the bot maybe finished the game
+            if (playerCardStaples[currentPlayer].length === 0) {
+                SuccessMessage(readablePlayerName(currentPlayer) + ' hat das Spiel gewonnen!')
+            } else {
+                this.setState({
+                    currentPlayer: (currentPlayer + 1) % 4,
+                })
+            }
         })
     }
 
@@ -166,9 +174,16 @@ class App extends React.Component<Props, State> {
                 newPlayerCardStaples[playerNumber] = newPlayerCardStaples[playerNumber].filter((c: ICard) => c.key !== cardId);
 
                 this.setState({
-                    currentPlayer: 0,
                     playedCards: playedCards,
                     playerCardStaples: newPlayerCardStaples
+                }, () => {
+                    if (newPlayerCardStaples[playerNumber].length === 0) {
+                        SuccessMessage('You have won the game!')
+                    } else {
+                        this.setState({
+                            currentPlayer: 0,
+                        })
+                    }
                 })
             } else {
                 ErrorMessage('Du kannst diese Karte nicht spielen!');
