@@ -2,7 +2,7 @@ import 'izitoast/dist/css/iziToast.css';
 import * as React from 'react';
 import './App.css';
 import {updateBotCardState} from "./helpers/botFunctions";
-import {distributeCards, generateCards, playableCards, validCard} from "./helpers/cardFunctions";
+import {distributeCards, generateCards, playableCards, randomlySortCards, validCard} from "./helpers/cardFunctions";
 import {readablePlayerName} from "./helpers/helpers";
 import {ErrorMessage, SuccessMessage} from "./helpers/iziToast";
 import {BotBoard} from "./layout/BotBoard";
@@ -20,6 +20,7 @@ interface Props {
 interface State {
     cardStaple: ICard[];
     currentPlayer: number;
+    gameFinished: Boolean;
     playedCards: ICard[];
     playerCardStaples: Array<ICard[]>
     loading: boolean;
@@ -33,6 +34,7 @@ class App extends React.Component<Props, State> {
         this.state = {
             cardStaple: [],
             currentPlayer: 3,
+            gameFinished: false,
             loading: true,
             playedCards: [],
             playerCardStaples: [],
@@ -43,9 +45,7 @@ class App extends React.Component<Props, State> {
     public componentDidMount(): void {
         // also sort the cards randomly
         this.setState({
-            cardStaple: generateCards().sort(function (a, b) {
-                return 0.5 - Math.random()
-            }),
+            cardStaple: randomlySortCards(generateCards()),
         }, () => {
             const distributedCards: DistributedCards = distributeCards(this.state.cardStaple);
             this.setState({...distributedCards}, () => {
@@ -55,6 +55,7 @@ class App extends React.Component<Props, State> {
 
                 this.setState({
                     cardStaple: newCardStaple,
+                    gameFinished: false,
                     loading: false,
                     playedCards: [firstCard],
                 })
@@ -72,6 +73,10 @@ class App extends React.Component<Props, State> {
 
             if (this.state.currentPlayer !== 3) {
                 this.calculateBotTurn()
+            }
+
+            if (this.state.cardStaple.length === 0) {
+                this.putPlayedCardsToCardStaple()
             }
         }
     }
@@ -107,7 +112,10 @@ class App extends React.Component<Props, State> {
         }, () => {
             // look if the bot maybe finished the game
             if (playerCardStaples[currentPlayer].length === 0) {
-                SuccessMessage(readablePlayerName(currentPlayer) + ' hat das Spiel gewonnen!')
+                SuccessMessage(readablePlayerName(currentPlayer) + ' has won the game')
+                this.setState({
+                    gameFinished: true
+                })
             } else {
                 this.setState({
                     currentPlayer: (currentPlayer + 1) % 4,
@@ -132,6 +140,14 @@ class App extends React.Component<Props, State> {
                 })
             }
         }
+    }
+
+    private putPlayedCardsToCardStaple() {
+        let { playedCards } = this.state
+
+        this.setState({
+            cardStaple: randomlySortCards(playedCards)
+        })
     }
 
     public takeCard = () => {
@@ -179,6 +195,9 @@ class App extends React.Component<Props, State> {
                 }, () => {
                     if (newPlayerCardStaples[playerNumber].length === 0) {
                         SuccessMessage('You have won the game!')
+                        this.setState({
+                            gameFinished: true
+                        })
                     } else {
                         this.setState({
                             currentPlayer: 0,
@@ -204,6 +223,11 @@ class App extends React.Component<Props, State> {
         } else {
             return (
                 <div style={{height: '100%', width: '100%'}}>
+                    { this.state.gameFinished && <div id="dimScreen">
+                        <div>
+                            Game Finished! <button className="green-button" onClick={() => this.componentDidMount()}>Wanna play again?</button>
+                        </div>
+                    </div>}
                     <div style={{height: '33%', width: '100%'}}>
                         <BotBoard botNumber={1} cards={this.state.playerCardStaples[0]}/>
                         <BotBoard botNumber={2} cards={this.state.playerCardStaples[1]}/>

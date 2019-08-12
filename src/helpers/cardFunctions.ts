@@ -62,10 +62,16 @@ export const distributeCards = (cards: ICard[]): DistributedCards => {
     }
 };
 
-export const validCard = (cardToPlay: ICard, lastCard: ICard) => {
-    return cardToPlay.color === lastCard.color || cardToPlay.value === lastCard.value
-};
-
 export const playableCards = (cards: ICard[], lastCard: ICard) => {
     return cards.map((c: ICard) => validCard(c, lastCard)).includes(true)
+};
+
+export const randomlySortCards = (cards: ICard[]) => {
+    return cards.sort(function (a, b) {
+        return 0.5 - Math.random()
+    })
+}
+
+export const validCard = (cardToPlay: ICard, lastCard: ICard) => {
+    return cardToPlay.color === lastCard.color || cardToPlay.value === lastCard.value
 };
