@@ -20,8 +20,8 @@ export const generateCards = (): ICard[] => {
     });
 
     // copy each cards again
-    allCards.forEach((c: IColorCard) => {
-        const clonedCard: IColorCard = Object.assign({}, c);
+    allCards.forEach((c: ICard) => {
+        const clonedCard: ICard = Object.assign({}, c);
         clonedCard.key = i;
         allCards.push(clonedCard);
         i++
@@ -70,7 +70,7 @@ export const randomlySortCards = (cards: ICard[]) => {
     return cards.sort(function (a, b) {
         return 0.5 - Math.random()
     })
-}
+};
 
 export const validCard = (cardToPlay: ICard, lastCard: ICard) => {
     return cardToPlay.color === lastCard.color || cardToPlay.value === lastCard.value
