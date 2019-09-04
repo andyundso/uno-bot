@@ -15,7 +15,5 @@ export const PlayerBoard = ({cards, onClick}: Props) =>
         height: '100%',
         width: '100%'
     }}>
-        {cards.map((c: ICard) => <Card key={c.key} color={c.color}
-                                       onClick={() => onClick(c.key)
-                                       } value={c.value}/>)}
+        {cards.map((c: ICard) => <Card onClick={() => onClick(c.key)} {...c}/>)}
     </div>;

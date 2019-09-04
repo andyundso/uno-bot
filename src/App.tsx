@@ -3,7 +3,7 @@ import * as React from 'react';
 import './App.css';
 import {updateBotCardState, willCorrectlyYellUno, willWronglyYellUno} from "./helpers/botFunctions";
 import {distributeCards, generateCards, playableCards, randomlySortCards, validCard} from "./helpers/cardFunctions";
-import {readablePlayerName} from "./helpers/helpers";
+import {nextPlayer, readablePlayerName} from "./helpers/helpers";
 import {ErrorMessage, SuccessMessage} from "./helpers/iziToast";
 import {BotBoard} from "./layout/BotBoard";
 import {Card} from "./layout/Card";
@@ -11,8 +11,6 @@ import {CardStaple} from "./layout/CardStaple";
 import {PlayerBoard} from "./layout/PlayerBoard";
 import {YellUno} from "./layout/YellUno";
 import {DistributedCards, ICard} from "./types";
-
-const playerNumber: number = 3;
 
 interface Props {
 }
@@ -23,9 +21,12 @@ interface State {
     gameFinished: Boolean;
     playedCards: ICard[];
     playerCardStaples: Array<ICard[]>
+    reverseDirection: boolean;
     loading: boolean;
     yelledUno: Array<Boolean>
 }
+
+const playerNumber: number = 3;
 
 class App extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -36,6 +37,7 @@ class App extends React.Component<Props, State> {
             currentPlayer: 3,
             gameFinished: false,
             loading: true,
+            reverseDirection: false,
             playedCards: [],
             playerCardStaples: [],
             yelledUno: [false, false, false, false]
@@ -120,7 +122,7 @@ class App extends React.Component<Props, State> {
                 })
             } else {
                 this.setState({
-                    currentPlayer: (currentPlayer + 1) % 4,
+                    currentPlayer: nextPlayer(this.state.currentPlayer, this.state.reverseDirection),
                 })
             }
         })
@@ -144,8 +146,17 @@ class App extends React.Component<Props, State> {
         }
     }
 
+    private processActionCard() {
+        switch (this.state.playedCards[0].type) {
+            case "reverse":
+                this.setState({
+                    reverseDirection: !this.state.reverseDirection
+                })
+        }
+    }
+
     private putPlayedCardsToCardStaple() {
-        let {playedCards} = this.state
+        let {playedCards} = this.state;
 
         this.setState({
             cardStaple: randomlySortCards(playedCards)
@@ -163,7 +174,7 @@ class App extends React.Component<Props, State> {
 
             // dont change the player if the picked card is playable
             this.setState({
-                currentPlayer: validCard(pickedCard!, this.state.playedCards[0]) ? 3 : 0,
+                currentPlayer: validCard(pickedCard!, this.state.playedCards[0]) ? this.state.currentPlayer : nextPlayer(this.state.currentPlayer, this.state.reverseDirection),
                 cardStaple: cardStaple,
                 playerCardStaples: newPlayerCardStaple
             })
@@ -195,14 +206,16 @@ class App extends React.Component<Props, State> {
                     playedCards: playedCards,
                     playerCardStaples: newPlayerCardStaples
                 }, () => {
+                    this.processActionCard();
+
                     if (newPlayerCardStaples[playerNumber].length === 0) {
-                        SuccessMessage('You have won the game!')
+                        SuccessMessage('You have won the game!');
                         this.setState({
                             gameFinished: true
                         })
                     } else {
                         this.setState({
-                            currentPlayer: 0,
+                            currentPlayer: nextPlayer(this.state.currentPlayer, this.state.reverseDirection),
                         })
                     }
                 })
@@ -249,7 +262,7 @@ class App extends React.Component<Props, State> {
                             height: '100%',
                             width: '33%'
                         }}>
-                            <Card color={this.state.playedCards[0].color} value={this.state.playedCards[0].value}/>
+                            <Card {...this.state.playedCards[0]}/>
                         </div>
                         <div style={{float: 'left', height: '100%', width: '33%'}}>
                             <YellUno onClick={this.yellUno}/>

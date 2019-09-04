@@ -1,4 +1,4 @@
-import {DistributedCards, ICard, IColorCard} from "../types";
+import {ActionCard, DistributedCards, ICard, IColorCard} from "../types";
 
 export const generateCards = (): ICard[] => {
     const colors: string[] = ['blue', 'green', 'red', 'yellow'];
@@ -39,17 +39,29 @@ export const generateCards = (): ICard[] => {
         i++;
     });
 
+    // add reverse card
+    colors.forEach((t: string) => {
+        const card: ActionCard = {
+            color: t,
+            key: i,
+            type: "reverse",
+        };
+
+        allCards.push(card);
+        i++;
+    });
+
     return allCards
 };
 
 export const distributeCards = (cards: ICard[]): DistributedCards => {
     const playerCardStaples: Array<ICard[]> = [];
-    Array.from({ length: 4 }).forEach((x, i) => {
+    Array.from({length: 4}).forEach((x, i) => {
         playerCardStaples.push([])
     });
 
     for (let i: number = 0; i <= 2; i++) {
-        Array.from({ length: 4 }).forEach((x, i) => {
+        Array.from({length: 4}).forEach((x, i) => {
             for (let j: number = 0; j <= 2; j++) {
                 playerCardStaples[i].push(cards.shift()!)
             }

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Card} from "./Card";
+import {BaseCard} from "./BaseCard";
 
 interface Props {
     cardStapleCount: number
@@ -14,6 +14,6 @@ export const CardStaple = ({cardStapleCount, onClick}: Props) =>
             display: 'flex',
             justifyContent: 'center',
         }}>
-            <Card verticalText color={'white'} onClick={onClick} value={'Karte ziehen'}/>;
+            <BaseCard verticalText color={'white'} onClick={onClick} value={"Karte ziehen"} />
         </div>
     </div>;
