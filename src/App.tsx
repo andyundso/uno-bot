@@ -82,27 +82,30 @@ class App extends React.Component<Props, State> {
     }
 
     private calculateBotTurn() {
-        let {cardStaple, playerCardStaples, playedCards} = this.state;
+        let {cardStaple, playedCards, playerCardStaples} = this.state;
         const {currentPlayer} = this.state;
         const lastCard = this.state.playedCards[0];
+        let currentPlayerCardStaple = playerCardStaples[currentPlayer];
 
         // determine if bot can play a card
-        const playableCards = playerCardStaples[currentPlayer].filter((card: ICard) => card.color === lastCard.color || card.value === lastCard.value);
+        const playableCards = currentPlayerCardStaple.filter((card: ICard) => card.color === lastCard.color || card.value === lastCard.value);
 
         if (playableCards.length > 0) {
-            let {newPlayedCards, playerCardStaple} = updateBotCardState(playableCards.shift()!, playerCardStaples[currentPlayer], this.state.playedCards)
+            let {newPlayedCards, newPlayerCardStaple} = updateBotCardState(playableCards.shift()!, currentPlayerCardStaple, this.state.playedCards);
             playedCards = newPlayedCards;
-            playerCardStaples[currentPlayer] = playerCardStaple;
+            currentPlayerCardStaple = newPlayerCardStaple;
         } else {
             // bot has nothing to play and needs to take a card
             const cardToTake = cardStaple.shift();
-            playerCardStaples[currentPlayer].unshift(cardToTake!)
+            currentPlayerCardStaple.unshift(cardToTake!)
         }
 
         // bot has an 90 percent chance to yell uno or a 2 percent chance to wrongly call uno
-        if (willCorrectlyYellUno(playerCardStaples[currentPlayer]) || willWronglyYellUno(playerCardStaples[currentPlayer])) {
+        if (willCorrectlyYellUno(currentPlayerCardStaple) || willWronglyYellUno(currentPlayerCardStaple)) {
             this.yellUno()
         }
+
+        playerCardStaples[currentPlayer] = currentPlayerCardStaple;
 
         this.setState({
             cardStaple: cardStaple,
@@ -111,7 +114,7 @@ class App extends React.Component<Props, State> {
         }, () => {
             // look if the bot maybe finished the game
             if (playerCardStaples[currentPlayer].length === 0) {
-                SuccessMessage(readablePlayerName(currentPlayer) + ' has won the game')
+                SuccessMessage(readablePlayerName(currentPlayer) + ' has won the game');
                 this.setState({
                     gameFinished: true
                 })
@@ -142,7 +145,7 @@ class App extends React.Component<Props, State> {
     }
 
     private putPlayedCardsToCardStaple() {
-        let { playedCards } = this.state
+        let {playedCards} = this.state
 
         this.setState({
             cardStaple: randomlySortCards(playedCards)
@@ -222,9 +225,10 @@ class App extends React.Component<Props, State> {
         } else {
             return (
                 <div style={{height: '100%', width: '100%'}}>
-                    { this.state.gameFinished && <div id="dimScreen">
+                    {this.state.gameFinished && <div id="dimScreen">
                         <div>
-                            Game Finished! <button className="green-button" onClick={() => this.componentDidMount()}>Wanna play again?</button>
+                            Game Finished! <button className="green-button"
+                                                   onClick={() => this.componentDidMount()}>Wanna play again?</button>
                         </div>
                     </div>}
                     <div style={{height: '33%', width: '100%'}}>

@@ -6,7 +6,7 @@ export const updateBotCardState = (cardToPlay: ICard, playerCardStaple: ICard[],
 
     return {
         newPlayedCards: playedCards,
-        playerCardStaple: playerCardStaple
+        newPlayerCardStaple: playerCardStaple
     }
 };
 
