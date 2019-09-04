@@ -9,3 +9,11 @@ export const updateBotCardState = (cardToPlay: ICard, playerCardStaple: ICard[],
         playerCardStaple: playerCardStaple
     }
 };
+
+export const willCorrectlyYellUno = (cardStaple: ICard[]) => {
+    return cardStaple.length === 1 && Math.random() < 0.9
+};
+
+export const willWronglyYellUno = (cardStaple: ICard[]) => {
+    return cardStaple.length !== 1 && Math.random() > 0.98
+};

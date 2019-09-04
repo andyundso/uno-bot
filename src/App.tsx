@@ -1,7 +1,7 @@
 import 'izitoast/dist/css/iziToast.css';
 import * as React from 'react';
 import './App.css';
-import {updateBotCardState} from "./helpers/botFunctions";
+import {updateBotCardState, willCorrectlyYellUno, willWronglyYellUno} from "./helpers/botFunctions";
 import {distributeCards, generateCards, playableCards, randomlySortCards, validCard} from "./helpers/cardFunctions";
 import {readablePlayerName} from "./helpers/helpers";
 import {ErrorMessage, SuccessMessage} from "./helpers/iziToast";
@@ -100,8 +100,7 @@ class App extends React.Component<Props, State> {
         }
 
         // bot has an 90 percent chance to yell uno or a 2 percent chance to wrongly call uno
-        if ((playerCardStaples[currentPlayer].length === 1 && Math.random() < 0.9) ||
-            playerCardStaples[currentPlayer].length !== 1 && Math.random() > 0.98) {
+        if (willCorrectlyYellUno(playerCardStaples[currentPlayer]) || willWronglyYellUno(playerCardStaples[currentPlayer])) {
             this.yellUno()
         }
 
