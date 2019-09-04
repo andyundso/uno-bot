@@ -13,19 +13,3 @@ export interface ICard {
 export interface IColorCard extends ICard {
     type: 'color'
 }
-
-export interface IBlueColorCard extends IColorCard {
-    color: 'blue'
-}
-
-export interface IGreenColorCard extends IColorCard {
-    color: 'green'
-}
-
-export interface IRedColorCard extends IColorCard {
-    color: 'red'
-}
-
-export interface IYellowColorCard extends IColorCard {
-    color: 'yellow'
-}
