@@ -114,6 +114,9 @@ class App extends React.Component<Props, State> {
             playedCards: playedCards,
             playerCardStaples: playerCardStaples
         }, () => {
+            // process action cards
+            this.processActionCard();
+
             // look if the bot maybe finished the game
             if (playerCardStaples[currentPlayer].length === 0) {
                 SuccessMessage(readablePlayerName(currentPlayer) + ' has won the game');
