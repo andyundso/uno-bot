@@ -6,7 +6,8 @@ import {ReverseCard} from "./ReverseCard";
 export function Card({color, onClick, type, value}: ICard & { onClick?: () => void }) {
     switch (type) {
         case "color":
-            return <ColorCard color={color} onClick={onClick} value={value || ""}/>;
+            const stringedValue: string = String(value);
+            return <ColorCard color={color} onClick={onClick} value={stringedValue}/>;
         case "reverse":
             return <ReverseCard color={color} onClick={onClick} />;
         default:
