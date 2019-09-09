@@ -3,7 +3,7 @@ import * as React from 'react';
 import './App.css';
 import {updateBotCardState, willCorrectlyYellUno, willWronglyYellUno} from "./helpers/botFunctions";
 import {distributeCards, generateCards, playableCards, randomlySortCards, validCard} from "./helpers/cardFunctions";
-import {nextPlayer, readablePlayerName} from "./helpers/helpers";
+import {nextPlayer, readablePlayerName, sleep} from "./helpers/helpers";
 import {ErrorMessage, SuccessMessage} from "./helpers/iziToast";
 import {BotBoard} from "./layout/BotBoard";
 import {Card} from "./layout/Card";
@@ -65,7 +65,7 @@ class App extends React.Component<Props, State> {
         });
     }
 
-    public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): void {
+    public async componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): Promise<void> {
         if (prevState.currentPlayer !== this.state.currentPlayer) {
             // check the uno calls from the last player
             this.checkForWrongUnoCalls(
@@ -74,7 +74,7 @@ class App extends React.Component<Props, State> {
             );
 
             if (this.state.currentPlayer !== 3) {
-                this.calculateBotTurn()
+                await this.calculateBotTurn()
             }
 
             if (this.state.cardStaple.length === 0) {
@@ -83,7 +83,10 @@ class App extends React.Component<Props, State> {
         }
     }
 
-    private calculateBotTurn() {
+    private async calculateBotTurn() {
+        // let the bots be a bit slower
+        await sleep(1000);
+
         let {cardStaple, playedCards, playerCardStaples} = this.state;
         const {currentPlayer} = this.state;
         const lastCard = this.state.playedCards[0];
@@ -109,13 +112,13 @@ class App extends React.Component<Props, State> {
 
         playerCardStaples[currentPlayer] = currentPlayerCardStaple;
 
-        this.setState({
+        await this.setState({
             cardStaple: cardStaple,
             playedCards: playedCards,
             playerCardStaples: playerCardStaples
-        }, () => {
+        }, async () => {
             // process action cards
-            this.processActionCard();
+            await this.processActionCard();
 
             // look if the bot maybe finished the game
             if (playerCardStaples[currentPlayer].length === 0) {
@@ -149,10 +152,10 @@ class App extends React.Component<Props, State> {
         }
     }
 
-    private processActionCard() {
+    private async processActionCard() {
         switch (this.state.playedCards[0].type) {
             case "reverse":
-                this.setState({
+                await this.setState({
                     reverseDirection: !this.state.reverseDirection
                 })
         }
@@ -196,7 +199,7 @@ class App extends React.Component<Props, State> {
         })
     }
 
-    public updatePlayerCardState = (cardId: number) => {
+    public updatePlayerCardState = async (cardId: number) => {
         const card = this.state.playerCardStaples[playerNumber].find((c: ICard) => c.key === cardId);
         if (card) {
             if (validCard(card, this.state.playedCards[0])) {
@@ -205,11 +208,11 @@ class App extends React.Component<Props, State> {
                 playedCards.unshift(card);
                 newPlayerCardStaples[playerNumber] = newPlayerCardStaples[playerNumber].filter((c: ICard) => c.key !== cardId);
 
-                this.setState({
+                await this.setState({
                     playedCards: playedCards,
                     playerCardStaples: newPlayerCardStaples
-                }, () => {
-                    this.processActionCard();
+                }, async () => {
+                    await this.processActionCard();
 
                     if (newPlayerCardStaples[playerNumber].length === 0) {
                         SuccessMessage('You have won the game!');
@@ -236,6 +239,8 @@ class App extends React.Component<Props, State> {
     };
 
     public render() {
+        const {currentPlayer} = this.state;
+
         if (this.state.loading) {
             return 'Spiel wird initialisiert'
         } else {
@@ -248,9 +253,9 @@ class App extends React.Component<Props, State> {
                         </div>
                     </div>}
                     <div style={{height: '33%', width: '100%'}}>
-                        <BotBoard botNumber={1} cards={this.state.playerCardStaples[0]}/>
-                        <BotBoard botNumber={2} cards={this.state.playerCardStaples[1]}/>
-                        <BotBoard botNumber={3} cards={this.state.playerCardStaples[2]}/>
+                        <BotBoard botNumber={1} cards={this.state.playerCardStaples[0]} currentPlayer={currentPlayer}/>
+                        <BotBoard botNumber={2} cards={this.state.playerCardStaples[1]} currentPlayer={currentPlayer}/>
+                        <BotBoard botNumber={3} cards={this.state.playerCardStaples[2]} currentPlayer={currentPlayer}/>
                     </div>
 
                     <div style={{height: '33%', width: '100%'}}>
@@ -274,6 +279,7 @@ class App extends React.Component<Props, State> {
 
                     <div style={{height: '33%'}}>
                         <PlayerBoard cards={this.state.playerCardStaples[playerNumber]}
+                                     currentPlayer={currentPlayer}
                                      onClick={this.updatePlayerCardState}/>
                     </div>
                 </div>
