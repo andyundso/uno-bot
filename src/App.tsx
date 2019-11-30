@@ -95,25 +95,10 @@ class App extends React.Component<Props, State> {
 
         playerCardStaples[currentPlayer] = currentPlayerCardStaple;
 
-        await this.setState({
-            cardStaple: cardStaple,
+        this.processCalculatedTurn({
+            ...this.state,
             playedCards: playedCards,
-            playerCardStaples: playerCardStaples
-        }, async () => {
-            // process action cards
-            await this.processActionCard();
-
-            // look if the bot maybe finished the game
-            if (playerCardStaples[currentPlayer].length === 0) {
-                SuccessMessage(readablePlayerName(currentPlayer) + ' has won the game');
-                this.setState({
-                    gameFinished: true
-                })
-            } else {
-                this.setState({
-                    currentPlayer: nextPlayer(this.state.currentPlayer, this.state.clockwiseDirection),
-                })
-            }
+            playerCardStaples: playerCardStaples,
         })
     }
 
@@ -135,13 +120,36 @@ class App extends React.Component<Props, State> {
         }
     }
 
-    private async processActionCard() {
-        switch (this.state.playedCards[0].type) {
-            case "reverse":
-                await this.setState({
-                    clockwiseDirection: !this.state.clockwiseDirection
-                })
+    private processCalculatedTurn = async (newState: State) => {
+        // process action cards
+        let updatedState = this.processActionCard(newState);
+
+        // look if player maybe finished the game (we will still process all actions)
+        if (updatedState.playerCardStaples[updatedState.currentPlayer].length === 0) {
+            this.setState({
+                ...updatedState,
+                gameFinished: true
+            });
+
+            SuccessMessage(readablePlayerName(updatedState.currentPlayer) + ' has won the game');
+        } else {
+            this.setState({
+                ...updatedState,
+                currentPlayer: nextPlayer(updatedState.currentPlayer, updatedState.clockwiseDirection),
+            })
         }
+    };
+
+    private processActionCard(newState: State): State {
+        switch (newState.playedCards[0].type) {
+            case "reverse":
+                newState = {
+                    ...newState,
+                    clockwiseDirection: !newState.clockwiseDirection
+                }
+        }
+
+        return newState
     }
 
     private putPlayedCardsToCardStaple() {
@@ -207,22 +215,10 @@ class App extends React.Component<Props, State> {
                 playedCards.unshift(card);
                 newPlayerCardStaples[playerNumber] = newPlayerCardStaples[playerNumber].filter((c: ICard) => c.key !== cardId);
 
-                await this.setState({
+                this.processCalculatedTurn({
+                    ...this.state,
                     playedCards: playedCards,
-                    playerCardStaples: newPlayerCardStaples
-                }, async () => {
-                    await this.processActionCard();
-
-                    if (newPlayerCardStaples[playerNumber].length === 0) {
-                        SuccessMessage('You have won the game!');
-                        this.setState({
-                            gameFinished: true
-                        })
-                    } else {
-                        this.setState({
-                            currentPlayer: nextPlayer(this.state.currentPlayer, this.state.clockwiseDirection),
-                        })
-                    }
+                    playerCardStaples: newPlayerCardStaples,
                 })
             } else {
                 ErrorMessage('Du kannst diese Karte nicht spielen!');
@@ -248,7 +244,7 @@ class App extends React.Component<Props, State> {
                     {this.state.gameFinished && <div id="dimScreen">
                         <div>
                             Game Finished! <button className="green-button"
-                                                   onClick={() => this.startNewGame}>Wanna play again?</button>
+                                                   onClick={this.startNewGame}>Wanna play again?</button>
                         </div>
                     </div>}
                     <div style={{height: '33%', width: '100%'}}>
