@@ -21,7 +21,7 @@ interface State {
     gameFinished: Boolean;
     playedCards: ICard[];
     playerCardStaples: Array<ICard[]>
-    reverseDirection: boolean;
+    clockwiseDirection: boolean;
     loading: boolean;
     yelledUno: Array<Boolean>
 }
@@ -37,7 +37,7 @@ class App extends React.Component<Props, State> {
             currentPlayer: 3,
             gameFinished: false,
             loading: true,
-            reverseDirection: false,
+            clockwiseDirection: true,
             playedCards: [],
             playerCardStaples: [],
             yelledUno: [false, false, false, false]
@@ -128,7 +128,7 @@ class App extends React.Component<Props, State> {
                 })
             } else {
                 this.setState({
-                    currentPlayer: nextPlayer(this.state.currentPlayer, this.state.reverseDirection),
+                    currentPlayer: nextPlayer(this.state.currentPlayer, this.state.clockwiseDirection),
                 })
             }
         })
@@ -156,7 +156,7 @@ class App extends React.Component<Props, State> {
         switch (this.state.playedCards[0].type) {
             case "reverse":
                 await this.setState({
-                    reverseDirection: !this.state.reverseDirection
+                    clockwiseDirection: !this.state.clockwiseDirection
                 })
         }
     }
@@ -180,7 +180,7 @@ class App extends React.Component<Props, State> {
 
             // dont change the player if the picked card is playable
             this.setState({
-                currentPlayer: validCard(pickedCard!, this.state.playedCards[0]) ? this.state.currentPlayer : nextPlayer(this.state.currentPlayer, this.state.reverseDirection),
+                currentPlayer: validCard(pickedCard!, this.state.playedCards[0]) ? this.state.currentPlayer : nextPlayer(this.state.currentPlayer, this.state.clockwiseDirection),
                 cardStaple: cardStaple,
                 playerCardStaples: newPlayerCardStaple
             })
@@ -221,7 +221,7 @@ class App extends React.Component<Props, State> {
                         })
                     } else {
                         this.setState({
-                            currentPlayer: nextPlayer(this.state.currentPlayer, this.state.reverseDirection),
+                            currentPlayer: nextPlayer(this.state.currentPlayer, this.state.clockwiseDirection),
                         })
                     }
                 })
