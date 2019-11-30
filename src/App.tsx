@@ -10,7 +10,7 @@ import {Card} from "./layout/Card";
 import {CardStaple} from "./layout/CardStaple";
 import {PlayerBoard} from "./layout/PlayerBoard";
 import {YellUno} from "./layout/YellUno";
-import {DistributedCards, ICard} from "./types";
+import {ICard} from "./types";
 
 interface Props {
 }
@@ -45,24 +45,7 @@ class App extends React.Component<Props, State> {
     }
 
     public componentDidMount(): void {
-        // also sort the cards randomly
-        this.setState({
-            cardStaple: randomlySortCards(generateCards()),
-        }, () => {
-            const distributedCards: DistributedCards = distributeCards(this.state.cardStaple);
-            this.setState({...distributedCards}, () => {
-                const firstCard = this.state.cardStaple[0];
-                const newCardStaple = this.state.cardStaple;
-                newCardStaple.unshift();
-
-                this.setState({
-                    cardStaple: newCardStaple,
-                    gameFinished: false,
-                    loading: false,
-                    playedCards: [firstCard],
-                })
-            })
-        });
+        this.startNewGame();
     }
 
     public async componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>): Promise<void> {
@@ -169,6 +152,22 @@ class App extends React.Component<Props, State> {
         })
     }
 
+    public startNewGame = () => {
+        let {cardStaple, playerCardStaples} = distributeCards(randomlySortCards(generateCards()));
+
+        // take away first card from the top as beginning card
+        const firstCard = cardStaple.shift();
+
+        this.setState({
+            cardStaple: cardStaple,
+            currentPlayer: 3,
+            gameFinished: false,
+            loading: false,
+            playedCards: [firstCard!],
+            playerCardStaples: playerCardStaples
+        });
+    };
+
     public takeCard = () => {
         if (playableCards(this.state.playerCardStaples[playerNumber], this.state.playedCards[0])) {
             ErrorMessage('Du kannst Karten ausspielen, daher musst du keine Karte ziehen!')
@@ -249,7 +248,7 @@ class App extends React.Component<Props, State> {
                     {this.state.gameFinished && <div id="dimScreen">
                         <div>
                             Game Finished! <button className="green-button"
-                                                   onClick={() => this.componentDidMount()}>Wanna play again?</button>
+                                                   onClick={() => this.startNewGame}>Wanna play again?</button>
                         </div>
                     </div>}
                     <div style={{height: '33%', width: '100%'}}>
