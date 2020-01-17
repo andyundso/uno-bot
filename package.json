@@ -21,7 +21,7 @@
     "@types/node": "^12.12.24",
     "@types/react": "^16.9.17",
     "@types/react-dom": "^16.0.11",
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.5"
   },
   "browserslist": {
     "production": [
